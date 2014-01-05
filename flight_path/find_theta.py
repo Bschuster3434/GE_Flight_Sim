@@ -10,8 +10,10 @@ def find_theta(oe, on, ne, nn): #Origin Easting and Northing, New Easting and No
 	
 	return theta
 	
-def find_next_ne(ox, oy, distance, angle):
+def find_next_ne(oe, on, ne, nn, distance):
 	## find the amount of distance travel horizontally
+	angle = find_theta(oe, on, ne, nn)
+	
 	## cos(angle) = adjacent / hypotenuse, which would become cos(angle) * hypotenuse = adjacent
 	delta_x = cos(angle) * distance
 	
@@ -19,6 +21,26 @@ def find_next_ne(ox, oy, distance, angle):
 	delta_y = sin(angle) * distance
 	
 	## now create the next x and y coordinates
-	nx = ox + delta_x; ny = oy + delta_y
+	nx = oe + delta_x; ny = on + delta_y
 	
-	return [nx, ny]
+	return [float(nx), float(ny)]
+
+def find_distance(oe, on, ne, nn):
+	delta_e = ne - oe
+	delta_n = nn - on
+	
+	distance = math.sqrt(delta_e**2 + delta_n**2)
+	return distance
+
+def find_next_ne_angle(oe, on, angle, distance):
+	
+	## cos(angle) = adjacent / hypotenuse, which would become cos(angle) * hypotenuse = adjacent
+	delta_x = cos(angle) * distance
+	
+	## sin(angle) = opposite / hypotenuse, which would become sin(angle) * hypotenuse = opposite
+	delta_y = sin(angle) * distance
+	
+	## now create the next x and y coordinates
+	nx = oe + delta_x; ny = on + delta_y
+	
+	return [float(nx), float(ny)]

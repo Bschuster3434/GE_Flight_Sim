@@ -1,9 +1,6 @@
 import shapely.geometry
 import pandas as pd
 
-rz = pd.read_csv('restrictedZones.csv')
-en_verts = list(rz['XYLambertVertices'])
-
 def create_ver_list(en): #Takes a list of strings with vertices and transforms them into a list of list or list, with each sublist being a vertice.
 	delimit = " " #A space divides each vertice.
 	lol_verts = []
@@ -34,11 +31,17 @@ def create_vert_point_list(str_vert):
 	return [x_coor, y_coor]
 		
 
-def create_nofly_polygons():
+def create_nofly_polygons(en_verts):
 	nofly_shapes = []
 	lol_verts = create_ver_list(en_verts)
 	for i in lol_verts:
 		next_shape = shapely.geometry.Polygon(i)
-		nofly_shapes.append(next_shape)
+		nofly_shapes.append([next_shape, i])
 		
 	return nofly_shapes
+	
+def test_intersect(no_flys, line):
+	for zone in no_flys:
+		if line.intersects(zone[0]) == True:
+			return zone
+	return False

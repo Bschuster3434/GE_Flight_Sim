@@ -1,8 +1,5 @@
 import csv
 
-airports_file = "Airports.csv"
-flights_file = "flights_20130910_1803.csv"
-
 def get_airport_coordinates(file):
 	airports_ne = {} ##Airports Northing Easting Dictionary
 	with open(file, 'rb') as csv_airports:
@@ -35,7 +32,7 @@ def create_coordinate_pairing(a_file, f_file):
 	flights = get_flight_info(f_file)
 	
 	for i in flights:
-		current_dest_pairings.append(i[0], i[2], airports[i[1]])
+		current_dest_pairings.append([i[0], [float(i[2][0]), float(i[2][1])], airports[i[1]]])
 	
 	return current_dest_pairings
 		
