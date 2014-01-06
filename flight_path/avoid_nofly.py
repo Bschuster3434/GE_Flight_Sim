@@ -75,5 +75,32 @@ def multiline_distance(candidate, curr_point, dest_point):
 	distance = find_distance(candidate[0], candidate[1], dest_point[0], dest_point[1])
 	distance = distance + find_distance(candidate[0], candidate[1], curr_point[0], curr_point[1])
 	return distance
-		
+
+
+def find_new_points(curr_point, dest_point):
+	curr_e = curr_point[0]
+	curr_n = curr_point[1]
+	dest_e = dest_point[0]
+	dest_n = dest_point[1]
+	
+	distances = [25, 50, 100, 200, 300, 400, 500, 1000] ##Amount choosen to move
+	
+	final_move_distance = math.pi #Final Movement Either Left or right, compared to straight to destination
+	num_of_moves = 25
+	move_distance = final_move_distance/num_of_moves
+	
+	dest_angle = find_theta(curr_e, curr_n, dest_e, dest_n)
+	
+	angle_movement_list = []
+	for i in range(1, int(num_of_moves) +1):
+		right = dest_angle + (i * move_distance); angle_movement_list.append(right)
+		left = dest_angle - (i * move_distance); angle_movement_list.append(left)
+	
+	new_curr_points = []
+	for angle in angle_movement_list:
+		for distance in distances:
+			next_point = find_next_ne_angle(curr_e, curr_n, angle, distance)
+			new_curr_points.append(next_point)
+	
+	return new_curr_points	
 		
