@@ -49,16 +49,16 @@ def avoidance_agent(dest_pair):
 			pivot_point = avoid_nofly(flight, intersect_result, no_fly)
 			if pivot_point == 0: ### Tests the scenario is one pivot point fails
 				#### Now we need to look for a 2nd ordinal
+				print "&&&&&&&&&&&&&&&&&&&&&&&&" + flight[0]
 				new_radials = find_new_points(cur_point, dest_point) ## Returns a list of Easting, Northing Points
+				#for i in new_radials:
+				#	print i
 				second_point = []
 				for point in new_radials: ##Tests the Line String between Current Point and New Point to confirm it's not in a no fly zone
 					new_line = shapely.geometry.LineString([cur_point, point])
 					result = test_intersect(no_fly, new_line)
 					if result == False:
 						second_point.append(point)
-						
-				for i in second_point: ####################################################
-					print flight[0], i
 				
 				distance_check = []
 				for point in second_point: ##Tests the new point to see if it can pass the avoid_nofly test
@@ -77,7 +77,7 @@ def avoidance_agent(dest_pair):
 						distance = distance_one + distance_two
 						distance_check.append([distance, [point, second_avoid_point]])
 				
-				
+
 				next_ords = [100000,[]]
 				for points in distance_check:
 					if points[0] < next_ords[0]:
