@@ -40,8 +40,8 @@ def create_nofly_polygons(en_verts):
 		
 	return nofly_shapes
 	
-def test_intersect(no_flys, line):
+def test_intersect(no_flys, line, altitude):
 	for zone in no_flys:
-		if line.intersects(zone[0]) == True:
+		if line.intersects(zone[0]) == True and zone[2] > altitude:
 			return zone
 	return False

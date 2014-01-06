@@ -29,15 +29,20 @@ degree_distance = descent_miles/miles_to_degrees
 def avoidance_agent(dest_pair):
 	rz = pd.read_csv(csv_path + 'restrictedZones.csv') ##Opens the no fly zone csv file and grabs the Lambert vertices
 	en_verts = list(rz['XYLambertVertices'])
+	UpperBound = list(rz['UpperBound'])
 	no_fly = create_nofly_polygons(en_verts) ## returns [<Polygon>, Points that make up the polygon]
+	list_length = len(UpperBound)
+	for i in range(0, list_length):
+		no_fly[i].append(int(UpperBound[i]))
 	
 	flight_ordinals = []
 	
 	for flight in dest_pair:
 		cur_point = flight[1]
 		dest_point = flight[2]
+		cur_altitude = flight[3]
 		path = shapely.geometry.LineString([cur_point, dest_point])
-		intersect_result = test_intersect(no_fly, path)
+		intersect_result = test_intersect(no_fly, path, cur_altitude)
 		if intersect_result == False:
 			current_distance = find_distance(dest_point[0], dest_point[1], cur_point[0], cur_point[1])
 			if current_distance > degree_distance:
@@ -56,14 +61,14 @@ def avoidance_agent(dest_pair):
 				second_point = []
 				for point in new_radials: ##Tests the Line String between Current Point and New Point to confirm it's not in a no fly zone
 					new_line = shapely.geometry.LineString([cur_point, point])
-					result = test_intersect(no_fly, new_line)
+					result = test_intersect(no_fly, new_line, cur_altitude)
 					if result == False:
 						second_point.append(point)
 				
 				distance_check = []
 				for point in second_point: ##Tests the new point to see if it can pass the avoid_nofly test
 					next_line = shapely.geometry.LineString([cur_point, point, dest_point])
-					result = test_intersect(no_fly, next_line)
+					result = test_intersect(no_fly, next_line, cur_altitude)
 					if result == False:
 						distance = multiline_distance(point, cur_point, dest_point)
 						distance_check.append([distance, [point]])

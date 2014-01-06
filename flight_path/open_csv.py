@@ -10,18 +10,18 @@ def get_airport_coordinates(file):
 	return airports_ne
 
 def get_flight_info(file):
-	flight_list = [] ##[flightid, arrival airport, [easting, northing]]
+	flight_list = [] ##[flightid, arrival airport, [easting, northing], altitude]
 	with open(file, 'rb') as csv_flights:
 		reader = csv.reader(csv_flights, delimiter=',')
 		next(reader, None) # skips the headers
 		if file != 'TestFlights.csv':
 			for row in reader:
-				flight_list.append([row[0], row[5], [float(row[1]), float(row[2])]])
+				flight_list.append([row[0], row[5], [float(row[1]), float(row[2])], float(row[3])])
 		else: 
 			for row in reader:
 				lon = float(row[5]); lat = float(row[4]) 
 				e_n_con = tolambert(lat, lon) #Need to covert X,Y into Easting Northing
-				flight_list.append([row[0], row[2], e_n_con])
+				flight_list.append([row[0], row[2], e_n_con, row[6]])
 				
 	return flight_list
 	
@@ -32,7 +32,7 @@ def create_coordinate_pairing(a_file, f_file):
 	flights = get_flight_info(f_file)
 	
 	for i in flights:
-		current_dest_pairings.append([i[0], [float(i[2][0]), float(i[2][1])], airports[i[1]]])
+		current_dest_pairings.append([i[0], [float(i[2][0]), float(i[2][1])], airports[i[1]], i[3]])
 	
 	return current_dest_pairings
 		
