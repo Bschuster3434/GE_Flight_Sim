@@ -11,7 +11,7 @@ execfile('avoid_nofly.py')
 csv_path = "csv_files/"
 
 airports_file = csv_path + "Airports.csv"
-flights_file = csv_path + "TestFlights.csv"
+flights_file = csv_path + "test_flight.csv"
 
 ### BelowFormat = [FlightId, [current easting, current northing], [destination easting, destination northing]]
 dest_pair = create_coordinate_pairing(airports_file, flights_file)
