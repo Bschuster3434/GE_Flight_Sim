@@ -47,15 +47,41 @@ def avoidance_agent(dest_pair):
 				flight_ordinals.append([flight[0], flight[1], flight[2]])
 		else:
 			pivot_point = avoid_nofly(flight, intersect_result, no_fly)
-			pivot_distance = find_distance(dest_point[0], dest_point[1], pivot_point[0], pivot_point[1])
-			if pivot_distance > degree_distance:
-				descent_point = find_next_ne(dest_point[0], dest_point[1], pivot_point[0], pivot_point[1], degree_distance)
-				flight_ordinals.append([flight[0], flight[1], pivot_point, descent_point, flight[2]])
+			print pivot_point
+			if pivot_point == 0:
+				flight_ordinals.append([flight[0], flight[1], flight[2]])
 			else:
-				flight_ordinals.append([flight[0], flight[1], pivot_point, flight[2]])
-				
-	return flight_ordinals		
+				pivot_distance = find_distance(dest_point[0], dest_point[1], pivot_point[0], pivot_point[1])
+				if pivot_distance > degree_distance:
+					descent_point = find_next_ne(dest_point[0], dest_point[1], pivot_point[0], pivot_point[1], degree_distance)
+					flight_ordinals.append([flight[0], flight[1], pivot_point, descent_point, flight[2]])
+				else:
+					flight_ordinals.append([flight[0], flight[1], pivot_point, flight[2]])
 	
+	flight_ords = create_ordinals(flight_ordinals)
+	
+	return flight_ords		
+	
+def create_ordinals(flight_ordinals):
+	##Final Format is [Flight Id, Ordinal, Latitude, Longitude, Altitude, Airspeed]
+	ordinals = [['FlightId', 'Ordinal', 'Latitude', 'Longitude', 'Altitude', 'Airspeed']]
+	for flight in flight_ordinals:
+		order = []
+		flightid = flight[0]
+		ordered_list = flight[2:]
+		list_length = len(ordered_list)
+		ordinal_number = 1
+		for i in ordered_list:
+			xy_coor = fromlambert(i[0], i[1])
+			if i != ordered_list[list_length - 1]:
+				order_info = [flightid, ordinal_number, xy_coor[0], xy_coor[1], 32000, 600]
+				ordinal_number = ordinal_number + 1
+			else:
+				order_info = [flightid, ordinal_number, xy_coor[0], xy_coor[1], 17990, 250]
+			ordinals.append(order_info)
+	
+	return ordinals	
+
 	
 
 
@@ -66,6 +92,8 @@ def write_list_to_csv(ordinals):
 		for i in ordinals:
 			flight_writer.writerow(i)
 
+write_to_list = avoidance_agent(dest_pair)
+write_list_to_csv(write_to_list)
 			
 		
 		
