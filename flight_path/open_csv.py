@@ -14,7 +14,8 @@ def get_flight_info(file):
 	with open(file, 'rb') as csv_flights:
 		reader = csv.reader(csv_flights, delimiter=',')
 		next(reader, None) # skips the headers
-		if file != 'TestFlights.csv':
+		check_test = file.find('TestFlights.csv')
+		if check_test == -1:
 			for row in reader:
 				flight_list.append([row[0], row[5], [float(row[1]), float(row[2])], float(row[3])])
 		else: 

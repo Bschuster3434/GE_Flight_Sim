@@ -65,7 +65,7 @@ def find_ordinal_point(avoidance_point, movement_angle, curr_point, dest_point, 
 	for next_dis in distance_range:
 		next_avoid_point = find_next_ne_angle(avoidance_point[0], avoidance_point[1], movement_angle, next_dis)
 		test_line = shapely.geometry.LineString([curr_point, next_avoid_point, dest_point])
-		intersection = test_intersect(no_fly, test_line, 100000)
+		intersection = test_intersect(no_fly, test_line)
 		if intersection == False:
 			return next_avoid_point
 			
@@ -83,10 +83,10 @@ def find_new_points(curr_point, dest_point):
 	dest_e = dest_point[0]
 	dest_n = dest_point[1]
 	
-	distances = range(25, 500, 25) ##Amount choosen to move
+	distances = range(25, 100, 25) ##Amount choosen to move
 	
 	final_move_distance = math.pi #Final Movement Either Left or right, compared to straight to destination
-	num_of_moves = 25
+	num_of_moves = 10
 	move_distance = final_move_distance/num_of_moves
 	
 	dest_angle = find_theta(curr_e, curr_n, dest_e, dest_n)
