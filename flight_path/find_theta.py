@@ -10,7 +10,7 @@ def find_theta(oe, on, ne, nn): #Origin Easting and Northing, New Easting and No
 	
 	return theta
 	
-def find_next_ne(oe, on, ne, nn, distance):
+def find_next_ne_twopoints(oe, on, ne, nn, distance):
 	## find the amount of distance travel horizontally
 	angle = find_theta(oe, on, ne, nn)
 	

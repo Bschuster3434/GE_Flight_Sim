@@ -10,6 +10,8 @@ def flight_path_skeleton(flight, no_fly):
 	rz_notes = [] ## Test if flying over no_fly_zone. [[<ordinal_over_zone>,<Upper_Bound>]]
 	
 	ordinal = 0
+	prev_line = 0 
+	buffer = .5
 	
 	while skeleton[-1] != destination:
 		next_line = shapely.geometry.LineString(no_fly, [next_start, destination])
@@ -18,7 +20,7 @@ def flight_path_skeleton(flight, no_fly):
 			skeleton.append(destination)
 		elif intersect_test in weather_zones:
 			bound = intersect_test[2]
-			next_start = find_closests_intersect(next_start, destination, intersect_test)
+			next_start, prev_line = find_closests_intersect(next_start, destination, intersect_test, prev_line, buffer)
 			skeleton.append(next_start)
 			rz_notes.append([ordinal, bound])
 		else:
@@ -42,10 +44,41 @@ def avoidance(curr_point, dest_point, zone): ##[restricted zone polygon, restric
 	
 	return avoidance_point
 	
-def find_closests_intersect(curr_point, dest_point, intersect_test): # Finds the closest intersect of a polygon
+def find_closests_intersect(curr_point, dest_point, intersect_test, prev_line, buffer): # Finds the closest intersect of a polygon
 	points = intersect_test[1]
 	line_polygon = create_lines(points)
 	
+	base_line_1 = array( tuple(curr_point) )
+	base_line_2 = array( tuple(dest_point) )
+	
+	intersects = []
+	
+	for line in line_polygon:
+		test_line_1 = array( tuple(line[0]) )
+		test_line_2 = array( tuple(line[1]) )
+		result = seg_intersect(base_line_1, base_line_2, test_line_1, test_line_2)
+		result_list = list(result)
+		if math.isnan(result_list[0]) == False:
+			base_x = curr_point[0]
+			base_y = curr_point[1]
+			to_x = result_list[0]
+			to_y = result_list[1]
+			
+			distance = find_distance(base_x, base_y, to_x, to_y)
+			intersects.append([result_list, distance, result_line])
+
+	shortest_point, distance, intersect_line = check_shortest_distance(intersects, prev_line)
+	
+	if prev_line == 0:
+		go_distance = distance - buffer
+		next_prev_line = intersect_line
+	else:
+		go_distance = distance + buffer
+		next_prev_line = 0
+		
+	next_start = find_next_ne_twopoints(curr_point[0], curr_point[1], dest_point[0], dest_point[1], go_distance)
+
+	return next_start, next_prev_line
 	
 
 def create_lines(points): #Create the exterior lines of the polygon
@@ -61,6 +94,18 @@ def create_lines(points): #Create the exterior lines of the polygon
 	
 	return lines
 	
+def check_shortest_distance(intersects, prev_line):
+	if prev_line != 0:
+		intersects = filter(lambda a : a != prev_line, intersects)	
+		
+	point_dis =[0, 100000, [0,0]]
+	
+	for i in intersects:
+		if i[1] < point_dis[1]:
+			point_dis == i
+	
+	
+	return point_dis[0], point_dis[1], point_dis[2]
 	
 	
 	
