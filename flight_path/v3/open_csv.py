@@ -37,4 +37,20 @@ def create_coordinate_pairing(a_file, f_file):
 	
 	return current_dest_pairings
 		
-	
+def get_extra_flight_details(flights_file):
+	extra_details = []
+	with open(flights_file) as csv_flights:
+		reader = csv.reader(csv_flights, delimiter=',')
+		next(reader, None)
+		check_test = file.find('TestFlights.csv')
+		if check_test == -1:
+			for row in reader:
+				flight_list.append([row[0], row[5], [float(row[1]), float(row[2])], float(row[3])])
+		else: 
+			for row in reader:
+				lon = float(row[5]); lat = float(row[4]) 
+				e_n_con = tolambert(lat, lon) #Need to covert X,Y into Easting Northing
+				flight_list.append([row[0], row[2], e_n_con, row[6]])
+				
+	return flight_list
+		

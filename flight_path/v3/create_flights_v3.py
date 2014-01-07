@@ -11,7 +11,7 @@ execfile('avoid_nofly.py')
 csv_path = "csv_files/"
 
 airports_file = csv_path + "Airports.csv"
-flights_file = csv_path + "test_flight.csv"
+flights_file = csv_path + "flights_20130910_1803.csv"
 
 ### BelowFormat = [FlightId, [current easting, current northing], [destination easting, destination northing]]
 dest_pair = create_coordinate_pairing(airports_file, flights_file)
@@ -143,7 +143,7 @@ def create_ordinals(flight_ordinals):
 		for i in ordered_list:
 			xy_coor = fromlambert(i[0], i[1])
 			if i != ordered_list[list_length - 1]:
-				order_info = [flightid, ordinal_number, xy_coor[0], xy_coor[1], 32000, 600]
+				order_info = [flightid, ordinal_number, xy_coor[0], xy_coor[1], 32000, 425]
 				ordinal_number = ordinal_number + 1
 			else:
 				order_info = [flightid, ordinal_number, xy_coor[0], xy_coor[1], 17990, 250]
