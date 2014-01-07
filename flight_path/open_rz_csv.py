@@ -83,31 +83,54 @@ def create_polygon_array(zoz):
 	for matched_zones in zoz:
 		zones = matched_zones[0]
 		bound = matched_zones[1]
-		
+
 		if len(zones) == 1:
-			polygon = create_shape(zones[0])
+			zones = seperate_points(zones[0])
+			polygon = create_shape(zones)
 		else:
-			polygon_1 = create_shape(zones[0])
-			polygon_2 = create_shape(zones[1])
+			zones_1 = seperate_points(zones[0])
+			zones_2 = seperate_points(zones[1])
+			polygon_1 = create_shape(zones_1)
+			polygon_2 = create_shape(zones_2)
 			poly_list = [polygon_1 , polygon_2]
 			polygon = shapely.ops.cascaded_union(poly_list)
+			zones = extract_points(polygon)
+		
 		result.append([polygon, zones, bound])
 	return result
 		
 def create_shape(zones):
 	trans_zones = []
 	for i in zones:
-		seperated = seperate_points(i)
-		trans_zones.append(seperated)
+		trans_zones.append(i)
 	shape = shapely.geometry.Polygon(trans_zones)
 	return shape
 		
-def seperate_points(string):
-	delimit = ":"
-	delimit_point = string.find(delimit)
-	x_coor = float(string[0:delimit_point])
-	y_coor = float(string[delimit_point + 1:])
-	return [x_coor, y_coor]	
+def seperate_points(list):
+	points = []
+	delimit = ":"	
+	for string in list:
+
+		delimit_point = string.find(delimit)
+		x_coor = float(string[0:delimit_point])
+		y_coor = float(string[delimit_point + 1:])
+		points.append([x_coor, y_coor])
+		
+	return points
+
+def extract_points(polygon):
+	new_points = []
+	
+	x_points, y_points = polygon.exterior.coords.xy
+	x_list = list(x_points)
+	y_list = list(y_points)
+	
+	length = len(x_list)
+	
+	for i in range(0, length):
+		new_points.append([x_list[i], y_list[i]])
+	
+	return new_points
 	
 	
 	

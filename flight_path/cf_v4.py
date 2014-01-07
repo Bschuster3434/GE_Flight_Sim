@@ -13,5 +13,6 @@ import itertools
 execfile('lambert.py')
 execfile('open_flight_csv.py')
 execfile('open_rz_csv.py')
-execfile('flight_path.skeleton.py')
+execfile('flight_path_skeleton.py')
+execfile('find_theta.py')
 
