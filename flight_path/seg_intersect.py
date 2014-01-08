@@ -16,3 +16,11 @@ def seg_intersect(a1,a2, b1,b2) :
     denom = dot( dap, db)
     num = dot( dap, dp )
     return (num / denom)*db + b1
+
+
+
+def ccw(A,B,C):
+    return (C[1]-A[1]) * (B[0]-A[0]) > (B[1]-A[1]) * (C[0]-A[0])
+# Return true if line segments AB and CD intersect
+def intersect(A,B,C,D):
+    return ccw(A,C,D) != ccw(B,C,D) and ccw(A,B,C) != ccw(A,B,D)
