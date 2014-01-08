@@ -10,15 +10,14 @@ def flight_path_skeleton(flight, no_fly):
 	rz_notes = [] ## Test if flying over no_fly_zone. [[<ordinal_over_zone>,<Upper_Bound>]]
 	
 	ordinal = 1
-	intersect_cross = .5 #
-	no_fly_buffer = 3
-	buffer = 3
+	intersect_cross = .5 
+	buffer = 10
 	
 	counter = 0
 	
 	while skeleton[-1] != destination:
 		next_line = shapely.geometry.LineString([next_start, destination])
-		intersect_test = test_intersect(no_fly, next_line)
+		intersect_test = test_intersect(no_fly, next_line, next_start, destination)
 		if intersect_test == False:
 			skeleton.append(destination)
 		elif intersect_test in weather_zones:
@@ -35,16 +34,38 @@ def flight_path_skeleton(flight, no_fly):
 		
 		if counter > 20:
 			print flight
+			print skeleton
 			break
 		
 	return skeleton, rz_notes ## List of ordinals that will accurately avoid no_fly zones
 	
 
-def test_intersect(no_fly, line):
+def test_intersect(no_fly, line, next_start, destination):
+	
+	sub_no_fly_zone = []
+	
 	for zone in no_fly:
 		if line.intersects(zone[0]) == True:
-			return zone
-	return False
+			sub_no_fly_zone.append(zone)
+	
+	if len(sub_no_fly_zone) == 0:
+		return False
+	elif len(sub_no_fly_zone) == 1:
+		return sub_no_fly_zone[0]
+	else:
+		line_distance = find_distance(next_start[0], next_start[1], destination[0], destination[1])
+		angle = find_theta(next_start[0], next_start[1], destination[0], destination[1])
+		breaks = 100
+		for i in range(1, breaks + 1):
+			next_distance = line_distance * float(i) / breaks
+			next_test_point = find_next_ne_angle(next_start[0], next_start[1], angle, next_distance)
+			next_line = shapely.geometry.LineString([next_start, next_test_point])
+			next_intersect_test = test_intersect(sub_no_fly_zone, next_line, [0,0],[0,0])
+			if next_intersect_test != False:
+				return next_intersect_test
+	
+	
+	
 	
 def avoidance(curr_point, dest_point, zone, buffer): ##[restricted zone polygon, restricted zone points, restricted zone upper bound]
 	polygon = zone[0]
