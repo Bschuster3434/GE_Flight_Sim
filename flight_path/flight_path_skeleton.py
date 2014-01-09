@@ -26,18 +26,19 @@ def flight_path_skeleton(flight, no_fly):
 			skeleton.append(next_start)
 			rz_notes.append([ordinal, bound])
 		else:
-			next_start = avoidance(next_start, destination, intersect_test, buffer)
+			next_start = avoidance(next_start, destination, intersect_test, buffer, no_fly)
 			skeleton.append(next_start)
 		
 		ordinal = ordinal + 1
 		counter = counter + 1
 		
 		if counter > 20:
-			print flight
-			print skeleton
+			##trouble.append([flight, skeleton])
+			print flight[0]
 			break
 		
-	return skeleton, rz_notes ## List of ordinals that will accurately avoid no_fly zones
+	#return skeleton, rz_notes ## List of ordinals that will accurately avoid no_fly zones
+	return skeleton
 	
 
 def test_intersect(no_fly, line, next_start, destination):
@@ -67,12 +68,12 @@ def test_intersect(no_fly, line, next_start, destination):
 	
 	
 	
-def avoidance(curr_point, dest_point, zone, buffer): ##[restricted zone polygon, restricted zone points, restricted zone upper bound]
+def avoidance(curr_point, dest_point, zone, buffer, no_fly): ##[restricted zone polygon, restricted zone points, restricted zone upper bound]
 	polygon = zone[0]
-	edge_points = zone[1][:-1] #takes the final duplicate point off
+	edge_points = zone[1]
 	
 	visible_edges = find_visible_edges(curr_point, polygon, edge_points)
-	next_start = find_furthest_point(curr_point, dest_point, visible_edges, buffer)
+	next_start = find_furthest_point(curr_point, dest_point, visible_edges, buffer, no_fly)
 	
 	return next_start
 	
@@ -97,11 +98,11 @@ def find_closests_intersect(curr_point, dest_point, intersect_test, intersect_cr
 			intersects.append([list(intersect_point), distance, line])
 	
 	shortest_point, distance, intersect_line = check_shortest_distance(intersects)
-	
+
 	go_distance = distance + intersect_cross
 		
-	next_start = find_next_ne_twopoints(curr_point[0], curr_point[1], dest_point[0], dest_point[1], go_distance)
-
+	next_start = find_next_ne_twopoints(curr_point[0], curr_point[1], shortest_point[0], shortest_point[1], go_distance)
+	
 	return next_start
 	
 
@@ -129,9 +130,9 @@ def check_shortest_distance(intersects):
 	
 def find_visible_edges(curr_point, polygon, edge_points):
 	visible = []
-	diminish_line = .98
+	diminish_line = .99999
 		
-	edge_angles = calculate_all_opposite_angles(edge_points)
+	edge_angles = calculate_all_opposite_angles(edge_points, polygon)
 	
 	for edge, edge_angle in edge_angles:
 		distance = find_distance(curr_point[0], curr_point[1], edge[0], edge[1])
@@ -145,35 +146,70 @@ def find_visible_edges(curr_point, polygon, edge_points):
 			
 	return visible
 	
-def calculate_all_opposite_angles(edge_points):
+def calculate_all_opposite_angles(edge_points, polygon):
 	length = len(edge_points)
+
 	
 	edge_angles = []
 	
 	for i in range(0, length):
-		previous = edge_points[i - 1]		
+		if i == 0:
+			previous = edge_points[length - 2]
+		else:
+			previous = edge_points[i - 1]		
 		current = edge_points[i]
 		if i == length - 1:
-			next = edge_points[0]
+			next = edge_points[1]
 		else:
 			next = edge_points[i + 1]
 			
-		opposite_angle = find_opposite_angle(previous, current, next)
+		opposite_angle = find_opposite_angle(previous, current, next, polygon)
 		edge_angles.append([current, opposite_angle])
 		
 	return edge_angles
-
-def find_opposite_angle(previous, current, next):
 	
-	angle_1 = find_theta(current[0], current[1], previous[0], previous[1]) % (2 * math.pi)
-	angle_2 = find_theta(current[0], current[1], next[0], next[1]) % (2 * math.pi)
 
-	angle_difference = (angle_1 + angle_2) / 2
-	opposite_angle = (angle_difference + math.pi) % (2 * math.pi)
+def find_polygon_center(edge_points):
+	num_of_points = len(edge_points)
+	
+	x,y = 0, 0
+	
+	for i in range(0, num_of_points):
+		x , y = x + edge_points[i][0], y + edge_points[i][1]
+	
+	new_x = x / num_of_points
+	new_y = y / num_of_points
+	
+	return [new_x, new_y]
+	
+	
+
+def find_opposite_angle(previous, current, next, polygon):
+	
+	angle_1 = (find_theta(current[0], current[1], previous[0], previous[1])) % ( 2 * math.pi )
+	angle_2 = find_theta(current[0], current[1], next[0], next[1]) % ( 2 * math.pi )
+	
+	angle_difference = ((angle_1 + angle_2) / 2) 
+	
+	point_test = find_next_ne_angle(current[0], current[1], angle_difference, 2); new_point = find_next_ne_angle(point_test[0], point_test[1], 0, .01)
+	line = shapely.geometry.LineString([point_test, new_point])
+	
+	spot_point_test = line.intersects(polygon)
+	
+	if spot_point_test == True:
+		opposite = (angle_difference + math.pi) % ( 2 * math.pi )
+	else:
+		opposite = angle_difference
+	
+	return opposite
 		
-	return opposite_angle
+def test_positive_or_negative(number):
+	if number > 0:
+		return True
+	else:
+		return False
 		
-def find_furthest_point(curr_point, dest_point, visible_edges, buffer):
+def find_furthest_point(curr_point, dest_point, visible_edges, buffer, no_fly):
 	
 	to_the_dest_angle = find_theta(curr_point[0], curr_point[1], dest_point[0], dest_point[1])
 	right_angle = math.pi/2
@@ -183,16 +219,23 @@ def find_furthest_point(curr_point, dest_point, visible_edges, buffer):
 	right_candidate, right_distance, right_ma = one_side_furthest(curr_point, dest_point, find_right_point_angle, visible_edges)
 	left_candidate, left_distance, left_ma = one_side_furthest(curr_point, dest_point, find_left_point_angle, visible_edges)
 	
-	if right_distance > left_distance:
+	r_line = shapely.geometry.LineString([curr_point, right_candidate])
+	r_inf = test_intersect(no_fly, r_line, curr_point, right_candidate)
+	
+	l_line = shapely.geometry.LineString([curr_point, left_candidate])
+	l_inf = test_intersect(no_fly, l_line, curr_point, left_candidate)	
+	
+	#if left_distance == 0 and right_distance == 0:
+	#	raise Exception("Error in flight: No furthest point.")
+	if right_distance < left_distance or l_inf != False:
 		f_point, m_angle = right_candidate, right_ma
-	else:
+	elif right_distance > left_distance or r_inf != False:
 		f_point, m_angle = left_candidate, left_ma
+		
 		
 	furthest_point = find_next_ne_angle(f_point[0], f_point[1], m_angle, buffer)	
 		
 	return furthest_point
-	
-	
 
 def one_side_furthest(curr_point, dest_point, angle, visible_edges):
 	
@@ -212,14 +255,9 @@ def one_side_furthest(curr_point, dest_point, angle, visible_edges):
 			new_distance = find_distance(point[0], point[1], intersect_result[0], intersect_result[1])
 			if new_distance > distance:
 				furthest_point, distance, move_angle = point, new_distance, m_angle
-				
+	
+	
 	return furthest_point, distance, move_angle
-	
-	
-	
-	
-	
-	
 	
 	
 	

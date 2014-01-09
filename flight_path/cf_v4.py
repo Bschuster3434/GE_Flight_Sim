@@ -16,5 +16,3 @@ execfile('open_rz_csv.py')
 execfile('flight_path_skeleton.py')
 execfile('find_theta.py')
 execfile('seg_intersect.py')
-
-
