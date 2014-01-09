@@ -1,5 +1,5 @@
 def flight_path_skeleton(flight, no_fly):
-	destination = [flight[2], 0]
+	destination = [flight[2], 0.0]
 	print destination
 	
 	test_start_point = find_next_ne_angle(flight[1][0], flight[1][1], 0, .01)
@@ -7,7 +7,7 @@ def flight_path_skeleton(flight, no_fly):
 	intersect_test = test_intersect(no_fly, next_line, flight[1], destination[0][0] )	
 	
 	if intersect_test == False:
-		next_start = [flight[1], 0]
+		next_start = [flight[1], 0.0]
 	else:
 		next_start = [flight[1], intersect_test[2]]
 	
@@ -20,18 +20,18 @@ def flight_path_skeleton(flight, no_fly):
 	
 	ordinal = 1
 	intersect_cross = .5 
-	buffer = 10
+	buffer = 10.0
 	
 	counter = 0
 	
 	while skeleton[-1] != destination:
 		next_line = shapely.geometry.LineString([next_start[0], destination[0]])
 		intersect_test = test_intersect(no_fly, next_line, next_start[0], destination[0])
-		bound = 0
+		bound = 0.0
 		if intersect_test == False:
 			skeleton.append(destination)
 		elif intersect_test in weather_zones:
-			bound = intersect_test[2]
+			bound = float(intersect_test[2])
 			next_point = find_closests_intersect(next_start[0], destination[0], intersect_test, intersect_cross)
 			skeleton.append([next_point, bound])
 			next_start = [next_point, bound]
