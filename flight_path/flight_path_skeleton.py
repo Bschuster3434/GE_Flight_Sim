@@ -1,12 +1,21 @@
 def flight_path_skeleton(flight, no_fly):
-	destination = flight[2]
-	next_start = flight[1]
+	destination = [flight[2], 0]
+	print destination
+	
+	test_start_point = find_next_ne_angle(flight[1][0], flight[1][1], 0, .01)
+	next_line = shapely.geometry.LineString([flight[1], test_start_point])
+	intersect_test = test_intersect(no_fly, next_line, flight[1], destination[0][0] )	
+	
+	if intersect_test == False:
+		next_start = [flight[1], 0]
+	else:
+		next_start = [flight[1], intersect_test[2]]
 	
 	weather_27000 = no_fly[0]
 	weather_32000 = no_fly[1]
 	weather_zones = [weather_27000, weather_32000]
 	
-	skeleton = [flight[1]]
+	skeleton = [next_start]
 	rz_notes = [] ## Test if flying over no_fly_zone. [[<ordinal_over_zone>,<Upper_Bound>]]
 	
 	ordinal = 1
@@ -16,27 +25,31 @@ def flight_path_skeleton(flight, no_fly):
 	counter = 0
 	
 	while skeleton[-1] != destination:
-		next_line = shapely.geometry.LineString([next_start, destination])
-		intersect_test = test_intersect(no_fly, next_line, next_start, destination)
+		next_line = shapely.geometry.LineString([next_start[0], destination[0]])
+		intersect_test = test_intersect(no_fly, next_line, next_start[0], destination[0])
+		bound = 0
 		if intersect_test == False:
 			skeleton.append(destination)
 		elif intersect_test in weather_zones:
 			bound = intersect_test[2]
-			next_start = find_closests_intersect(next_start, destination, intersect_test, intersect_cross)
-			skeleton.append(next_start)
-			rz_notes.append([ordinal, bound])
+			next_point = find_closests_intersect(next_start[0], destination[0], intersect_test, intersect_cross)
+			skeleton.append([next_point, bound])
+			next_start = [next_point, bound]
 		else:
-			next_start = avoidance(next_start, destination, intersect_test, buffer, no_fly)
-			skeleton.append(next_start)
+			next_point = avoidance(next_start[0], destination[0], intersect_test, buffer, no_fly)
+			skeleton.append([next_point, bound])
+			next_start = [next_point, bound]
 		
 		ordinal = ordinal + 1
 		counter = counter + 1
 		
 		if counter > 20:
-			print flight[0]
+			skeleton.append(destination)
+			for i in skeleton:
+				print i
 			break
 		
-	return skeleton, rz_notes ## List of ordinals that will accurately avoid no_fly zones
+	return skeleton ## List of ordinals that will accurately avoid no_fly zones
 	
 
 def test_intersect(no_fly, line, next_start, destination):
