@@ -1,10 +1,16 @@
-def flight_path_alt_speed(skeleton, cruise_speed, cruise_alt, descent_dis, descent_speed, descent_alt):
+def flight_path_alt_speed(skeleton, c_speed, c_alt, d_dis, d_speed, d_alt):
+
+	destination = skeleton[-1][0]
 
 	flight_distance, dis_skel = find_flight_distance(skeleton) # returns the total flight distance and appends markers to points
+	### Skeleton is now [<point>, bound, mile_marker]
 	
-	descent_mile_marker = flight_distance - flight_dis #Finds the descent point
+	descent_mile_marker = flight_distance - d_dis #Finds the descent point
 	
-	flight_alt_speed = find_ordinal_alt_speeds
+	skel_with_descent = find_descent_point(dis_skel, descent_mile_marker)
+	
+	flight_alt_speed = find_ordinal_alt_speed(skel_with_descent, descent_mile_marker, destination, c_speed, c_alt, d_speed, d_alt)
+	
 	
 	
 def find_flight_distance(old_skeleton):
@@ -20,8 +26,48 @@ def find_flight_distance(old_skeleton):
 		###skeleton[i] is the [point, bound], [0] is point, [0][0] is x, [0][1] is y
 		distance = distance + find_distance(skeleton[i][0][0], skeleton[i][0][1], skeleton[i + 1][0][0], skeleton[i + 1][0][1])
 		skeleton[i + 1].append(distance) #Appends current distance to the skeleton
-	return distance, skeleton
 		
+	return distance, skeleton
+
+def find_descent_point(dis_skel, marker): #Adds 1 to the descent point
+	
+	marked_skel = []
+	
+	list_length = len(dis_skel)
+	
+	for i in range(0, list_length - 1): ## -1 because we don't want to check the final point
+		curr_pack = dis_skel[i]
+		next_pack = dis_skel[i+1]
+		
+		curr_dis = curr_pack[2]
+		next_dis = next_pack[2]
+		
+		marked_skel.append([curr_pack[0], curr_pack[1], curr_pack[2], 0])
+		
+		if marker > curr_dis and marker < next_dis:
+			distance_to_marker = marker - curr_dis
+			angle = find_theta(curr_pack[0][0], curr_pack[0][1], next_pack[0][0], next_pack[0][1])
+			descent_point = find_next_ne_angle(curr_pack[0][0], curr_pack[0][1], angle, distance_to_marker)
+			
+			marked_skel.append([descent_point, curr_pack[1], curr_pack[2], 1])
+
+	final_pack = dis_skel[-1]
+	marked_skel.append([final_pack[0], final_pack[1], final_pack[2], 0])
+			
+	return marked_skel
+
+	
+def find_ordinal_alt_speed(skeleton, descent_mile_marker, destination, c_speed, c_alt, d_speed, d_alt):
+	ordinal_list = []
+	
+	for ordinal in skeleton:
+		point = ordinal[0]
+		lower_bound = ordinal[1]
+		mile_marker = ordinal[2]
+		
+		if mile_marker < descent_mile_marker:
+			ordinal_list.append[point, c_alt, c_speed]
+			
 		
 def test_skeleton(choice):
 	skel_0 = [[[877.597749, 886.747467], 0], [[940.2115511, 972.1340222], 0]]
@@ -33,14 +79,14 @@ def test_skeleton(choice):
 	
 	#basic points below
 	
-	skel_6 = [[[0, 0], 0], [[3, 0], 0], [[3, 10], 0]]
-	skel_7 = [[[0, 0], 0], [[3, 0], 0], [[3,9], 0], [[3, 10], 0]]
+	skel_6 = [[[0.0, 0.0], 0], [[3.0, 0.0], 0], [[3.0, 10.0], 0]]
+	skel_7 = [[[0.0, 0.0], 0], [[3.0, 0.0], 0], [[3.0, 9.0], 0], [[3.0, 10.0], 0]]
 	
 	
 	if choice == 1:
 		return [skel_6, skel_7]
 		
-	else:
+	elif choice == 0:
 		return [skel_0, skel_1, skel_2, skel_3, skel_4, skel_5]
 	
 	
