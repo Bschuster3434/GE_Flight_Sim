@@ -17,4 +17,5 @@ execfile('flight_path_skeleton.py')
 execfile('find_theta.py')
 execfile('seg_intersect.py')
 execfile('flight_path_alt_speed.py')
+execfile('create_ordianls_and_write_csv')
 

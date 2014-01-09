@@ -1,6 +1,5 @@
 def flight_path_alt_speed(skeleton, c_speed, c_alt, d_dis, d_speed, d_alt):
 
-	destination = skeleton[-1][0]
 
 	flight_distance, dis_skel = find_flight_distance(skeleton) # returns the total flight distance and appends markers to points
 	### Skeleton is now [<point>, bound, mile_marker]
@@ -8,8 +7,13 @@ def flight_path_alt_speed(skeleton, c_speed, c_alt, d_dis, d_speed, d_alt):
 	descent_mile_marker = flight_distance - d_dis #Finds the descent point
 	
 	skel_with_descent = find_descent_point(dis_skel, descent_mile_marker)
+	#### Skeleton is now [<point>, bound, mile_marker, descent_binary]
 	
-	flight_alt_speed = find_ordinal_alt_speed(skel_with_descent, descent_mile_marker, destination, c_speed, c_alt, d_speed, d_alt)
+	destination_pack = skel_with_descent[-1]
+	
+	flight_alt_speed = find_ordinal_alt_speed(skel_with_descent, destination_pack, d_dis, c_speed, c_alt, d_speed, d_alt)
+	
+	return flight_alt_speed
 	
 	
 	
@@ -57,16 +61,41 @@ def find_descent_point(dis_skel, marker): #Adds 1 to the descent point
 	return marked_skel
 
 	
-def find_ordinal_alt_speed(skeleton, descent_mile_marker, destination, c_speed, c_alt, d_speed, d_alt):
+def find_ordinal_alt_speed(skeleton, destination_pack, d_dis, c_speed, c_alt, d_speed, d_alt):
 	ordinal_list = []
+	
+	dest_point = destination_pack[0]
+	dest_mile_marker = destination_pack[2]
+	
+	
+	in_descent = 0
 	
 	for ordinal in skeleton:
 		point = ordinal[0]
 		lower_bound = ordinal[1]
 		mile_marker = ordinal[2]
-		
-		if mile_marker < descent_mile_marker:
-			ordinal_list.append[point, c_alt, c_speed]
+		descent_binary = ordinal[3]
+			
+		if in_descent == 0 and c_alt > lower_bound:
+			ordinal_list.append([point, c_alt, c_speed])
+		elif in_descent == 0 and c_alt < lower_bound:
+			ordinal_list.append([point, lower_bound + 500, c_speed])
+		elif point != dest_point:
+			current_distanct_to_dest = dest_mile_marker - mile_marker
+			altitude_percent = current_distanct_to_dest / d_dis
+			altitude_difference_cd = c_alt - d_alt
+			current_altitude = (altitude_percent * altitude_difference_cd ) + d_alt
+			ordinal_list.append([point, current_altitude, d_speed])
+		elif point == dest_point:
+			ordinal_list.append([point, d_alt, d_speed])
+		else:
+			raise Exception("Something Fucked Up")
+			
+			
+		if descent_binary == 1:
+			in_descent = 1
+			
+	return ordinal_list
 			
 		
 def test_skeleton(choice):
