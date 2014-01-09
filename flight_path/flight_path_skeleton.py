@@ -33,12 +33,10 @@ def flight_path_skeleton(flight, no_fly):
 		counter = counter + 1
 		
 		if counter > 20:
-			##trouble.append([flight, skeleton])
 			print flight[0]
 			break
 		
-	#return skeleton, rz_notes ## List of ordinals that will accurately avoid no_fly zones
-	return skeleton
+	return skeleton, rz_notes ## List of ordinals that will accurately avoid no_fly zones
 	
 
 def test_intersect(no_fly, line, next_start, destination):
@@ -222,15 +220,11 @@ def find_furthest_point(curr_point, dest_point, visible_edges, buffer, no_fly):
 	r_line = shapely.geometry.LineString([curr_point, right_candidate])
 	r_inf = test_intersect(no_fly, r_line, curr_point, right_candidate)
 	
-	l_line = shapely.geometry.LineString([curr_point, left_candidate])
-	l_inf = test_intersect(no_fly, l_line, curr_point, left_candidate)	
-	
-	#if left_distance == 0 and right_distance == 0:
-	#	raise Exception("Error in flight: No furthest point.")
-	if right_distance < left_distance or l_inf != False:
+	if right_distance > 0 and r_inf != False:
 		f_point, m_angle = right_candidate, right_ma
-	elif right_distance > left_distance or r_inf != False:
+	else:
 		f_point, m_angle = left_candidate, left_ma
+		
 		
 		
 	furthest_point = find_next_ne_angle(f_point[0], f_point[1], m_angle, buffer)	
@@ -243,10 +237,14 @@ def one_side_furthest(curr_point, dest_point, angle, visible_edges):
 	distance = 0
 	move_angle = 0
 	
+	curr_dest_angle = find_theta(curr_point[0], curr_point[1], dest_point[0], dest_point[1])
+	seg_point_1 = find_next_ne_angle(curr_point[0], curr_point[1], (curr_dest_angle + math.pi), 10000)
+	seg_point_2 = find_next_ne_angle(curr_point[0], curr_point[1], curr_dest_angle, 10000)
+	
 	for point, m_angle in visible_edges:
 		test_point = find_next_ne_angle(point[0], point[1], angle, 500)
 		##test_line = shapely.geometry.LineString([point[0], point[1], test_point[0], test_point[1]])
-		result = intersect(curr_point, dest_point, point, test_point)
+		result = intersect(seg_point_1, seg_point_2, point, test_point)
 		if result == False:
 			continue
 		else:
@@ -258,9 +256,6 @@ def one_side_furthest(curr_point, dest_point, angle, visible_edges):
 	
 	
 	return furthest_point, distance, move_angle
-	
-	
-	
 	
 	
 	
