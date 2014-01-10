@@ -108,7 +108,7 @@ def create_shape(zones):
 		
 def seperate_points(list):
 	points = []
-	delimit = " "	
+	delimit = ":"	
 	for string in list:
 
 		delimit_point = string.find(delimit)
@@ -122,7 +122,6 @@ def extract_points(polygon):
 	new_points = []
 	
 	x_points, y_points = polygon.exterior.coords.xy
-	print x_points
 	x_list = list(x_points)
 	y_list = list(y_points)
 	
