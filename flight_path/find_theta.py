@@ -24,7 +24,8 @@ def find_next_ne_twopoints(oe, on, ne, nn, distance):
 	nx = oe + delta_x; ny = on + delta_y
 	
 	return [float(nx), float(ny)]
-
+	
+	
 def find_distance(oe, on, ne, nn):
 	delta_e = ne - oe
 	delta_n = nn - on

@@ -20,7 +20,7 @@ execfile('seg_intersect.py')
 execfile('flight_path_alt_speed.py')
 execfile('create_ordinals_and_write_csv.py')
 
-flights_csv = 'test_20130910_1803.csv'
+flights_csv = 'flights_20130910_1803.csv'
 no_fly_csv = 'restrictedZones.csv'
 
 flights = open_flight_csv(flights_csv)
@@ -30,8 +30,11 @@ all_ordinals = []
 
 for flight in flights:
 	skeleton = flight_path_skeleton_v2(flight, no_fly)
-	ordinals = flight_path_alt_speed(skeleton, 525, 38000, 90, 250, 17790)
-	all_ordinals.append(ordinals)
+	ordinals = flight_path_alt_speed(skeleton, 600, 32001, 90, 250, 17790)
+	all_ordinals.append(skeleton)
 
 create_ordinals_and_write_csv(all_ordinals, flights)
+
+
+
 

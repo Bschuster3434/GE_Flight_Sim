@@ -54,6 +54,10 @@ def find_descent_point(dis_skel, marker): #Adds 1 to the descent point
 			descent_point = find_next_ne_angle(curr_pack[0][0], curr_pack[0][1], angle, distance_to_marker)
 			
 			marked_skel.append([descent_point, curr_pack[1], curr_pack[2], 1])
+			
+		elif marker < 0:
+			
+			marked_skel.append([curr_pack[0], curr_pack[1], curr_pack[2], 1])
 
 	final_pack = dis_skel[-1]
 	marked_skel.append([final_pack[0], final_pack[1], final_pack[2], 0])

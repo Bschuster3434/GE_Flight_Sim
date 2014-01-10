@@ -18,10 +18,10 @@ def open_flight_csv(file):
 				fuel_remaining = float(row[8]) - float(row[9])
 			
 			else:
-				current_coor = tolambert(float([4]), float([5]))
+				current_coor = tolambert(float(row[4]), float(row[5]))
 				dest_coor = airport_dict[row[2]]
 				altitude = float(row[6])
-				fuel_remaining = float([10])
+				fuel_remaining = float(row[10])
 			
 			to_append = [flightId, current_coor, dest_coor, altitude, fuel_remaining]
 		

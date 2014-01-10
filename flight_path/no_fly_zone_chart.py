@@ -18,7 +18,7 @@ execfile('find_theta.py')
 execfile('seg_intersect.py')
 
 ### Files to Execute
-def nfzc(curr, dest, tp, zone, line1, line2):
+def nfzc(curr, dest, line, zone):
 
 	execfile('open_rz_csv.py')
 
@@ -42,20 +42,13 @@ def nfzc(curr, dest, tp, zone, line1, line2):
  
 		ax.add_patch(descartes.PolygonPatch(i[0], fc='blue', alpha=0.5))
  
-	trouble_point = shapely.geometry.Point(tp[0], tp[1]).buffer(buffer)
 	airport = shapely.geometry.Point(dest[0], dest[1]).buffer(buffer)
 	start = shapely.geometry.Point(curr[0], curr[1]).buffer(buffer)
+	
+	ax.plot(*np.array(line).T, color='blue', linewidth=3, solid_capstyle='round')
 
-	ax.add_patch(descartes.PolygonPatch(trouble_point, fc='red', alpha=0.5))
 	ax.add_patch(descartes.PolygonPatch(airport, fc='black', alpha=0.5))
 	ax.add_patch(descartes.PolygonPatch(start, fc='green', alpha=0.5))
-	
-	
-	line1_s = shapely.geometry.LineString([line1[0], line1[1]])
-	line2_s = shapely.geometry.LineString([line2[0], line2[1]])
-	
-	ax.plot(*np.array(line1_s).T, color='red', linewidth=3, solid_capstyle='round')
-	ax.plot(*np.array(line2_s).T, color='red', linewidth=3, solid_capstyle='round')
 	
 	
 
